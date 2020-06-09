@@ -1,0 +1,63 @@
+# Docker Compose file to start up a polkadot node with prometheus
+# and grafana to be able to easily run and monitor it.
+#
+# Exposes the RPC of the node so that you can connect Polkadot.js Apps to it.
+#
+# Usage:
+#
+# 1. Start networks and containers: `docker-compose up`
+#
+# 2. Reach:
+#   - polkdaot node: localhost:9944
+#   - polkadot prometheus endpoint: localhost:9945
+#   - grafana: localhost:3001
+#   - prometheus: localhost:9090
+
+
+version: "3.7"
+services:
+
+  polkadot:
+    ports:
+      - "9944:9944"
+      - "9615:9615"
+    image: parity/polkadot
+    volumes:
+      - ./db/:/etc/polkadot/db/
+    command:
+      - "--name"
+      - "XYZ"
+      - "--base-path"
+      - "/etc/polkadot/db/"
+      # Not only bind to localhost.
+      - "--unsafe-ws-external"
+      - "--unsafe-rpc-external"
+      - "--no-telemetry" # Comment out if you want to show up on telemetry
+      - "--rpc-cors"
+      - "all"
+      - "--prometheus-external"
+      - "--execution"
+      - "native"
+      - "--wasm-execution"
+      - "compiled"
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    links:
+      - polkadot:polkadot
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    user: "104"
+    depends_on:
+      - prometheus
+    ports:
+      - 3001:3000
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning
+    restart: always
