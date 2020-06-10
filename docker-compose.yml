@@ -8,7 +8,8 @@
 # 1. Start networks and containers: `docker-compose up`
 #
 # 2. Reach:
-#   - polkdaot node: localhost:9944
+#   - polkadot node: localhost:9944
+#   - polkadotjs ui: localhost:3000
 #   - polkadot prometheus endpoint: localhost:9945
 #   - grafana: localhost:3001
 #   - prometheus: localhost:9090
@@ -40,6 +41,13 @@ services:
       - "native"
       - "--wasm-execution"
       - "compiled"
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: PolkadotJS-Dockerfile
+    ports:
+      - "3000:80"
 
   prometheus:
     image: prom/prometheus
